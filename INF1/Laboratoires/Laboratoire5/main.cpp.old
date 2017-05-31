@@ -1,0 +1,130 @@
+/*
+ -----------------------------------------------------------------------------------
+ Laboratoire : 05
+ Fichier     : Fournier.cpp
+ Auteur(s)   : Robin Fournier
+ Date        : 01.11.2016
+
+ But         : Écrire un programme qui saisit au clavier une valeur de type float et
+               qui affiche ce nombre en binaire selon la Norme IEEE 754 sur 32 bits.
+               Les 3 champs seront affichés séparément:
+                - 1 bit pour le signe
+                - 23 bits pour la mantisse
+                - 8 bits pour l'exposant
+ 
+ Remarque(s) : <à compléter>
+
+ Compilateur : Ubuntu g++ 5.4.0
+ -----------------------------------------------------------------------------------
+ */
+
+#include <cstdlib>
+#include <iostream>
+
+
+using namespace std;
+
+string fnBinaireInt(int value)
+{
+    int reste = 0;
+    int tempValeur = abs(value);
+    string binaire;
+    
+    do
+    {
+        reste = tempValeur % 2;
+        tempValeur =  (tempValeur - reste) / 2;
+        binaire = to_string(reste) + binaire;  
+    }
+    while(tempValeur != 0);
+    
+    return binaire;
+}
+
+int main(int argc, char** argv) {
+    
+    float valeur, valeurAbs, decimal;
+    int expo = 127;
+    unsigned int signe;
+    string mantisse, exposant, binEntier, binDecimal;
+    bool noDecimalPart = false;
+    
+    cout << "Valeur : ";
+    cin >> valeur;
+    cout << endl;
+    
+    signe = valeur >= 0 ? 0 : 1;
+    binEntier = fnBinaireInt(valeur);
+    string strTemp;
+    for(int i = 1; i < binEntier.size(); i++){
+        strTemp += binEntier[i];
+    }
+    mantisse = strTemp;
+    //expo += mantisse.size();
+    double pow = 2;
+    if(mantisse.size() < 23)
+    {
+        valeurAbs = valeur < 0 ? valeur * -1 : valeur;
+        decimal = valeurAbs - (int)valeurAbs;
+        noDecimalPart = decimal==0;
+    
+        for(int i = 1; i <= 23-mantisse.size() ; i++)
+        {
+            if(decimal - 1/pow >= 0.0)
+            {
+                binDecimal += '1';
+                decimal = decimal - 1/pow;
+            }
+            else
+                binDecimal += '0';
+            pow *=2;
+        }
+    }
+    if(binDecimal[0] == '0' && !noDecimalPart)
+    {
+        bool bEnd =false;
+        int cptExpo=0;
+        do
+        {
+            if(binDecimal[cptExpo] == '1')
+                bEnd = true;
+            cptExpo++;
+        }
+        while(!bEnd);
+        
+        binDecimal = "";
+        decimal = valeurAbs - (int)valeurAbs;
+        pow = 2;
+        
+        for(int i = 1; i <= 23-mantisse.size()+cptExpo ; i++)
+        {
+            if(decimal - 1/pow >= 0.0)
+            {
+                if(i>cptExpo)
+                    binDecimal += '1';
+                decimal = decimal - 1/pow;
+            }
+            else if(i>cptExpo)
+                binDecimal += '0';
+                
+            pow *=2;             
+        }
+        cptExpo *= -1;
+        expo+=cptExpo;
+        
+        cout << cptExpo << endl;
+    } else {
+        expo += mantisse.size();
+    }
+    mantisse +=binDecimal;
+    exposant = fnBinaireInt(expo);
+    
+    //cout << "Binaire Entier: " << binEntier << endl;
+    //cout << "Binaire Decimal: " << binDecimal << endl;
+    
+    cout << "Signe : " << signe << endl;
+    cout << "Mantisse : " << mantisse << endl;
+    cout << "Exposant : " << exposant << "(" << expo <<")"<< endl;
+    return 0;
+}
+
